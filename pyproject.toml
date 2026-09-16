@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "logsGrafana"
+version = "0.1.0"
+description = "UI para construir consultas Loki y abrir Grafana Explore"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "gradio==6.19.0"
+]
+
+[project.scripts]
+logs-grafana = "logs_grafana.grafana_explore_ui:launch_ui"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
