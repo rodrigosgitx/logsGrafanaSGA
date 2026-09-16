@@ -41,21 +41,27 @@ La interfaz queda disponible en:
 ## Notas
 
 - El script genera la consulta LogQL y abre Grafana Explore en el navegador.
-- Los `projectkey` y `slot` estan preconfigurados en el propio script.
+- La jerarquia de seleccion en la interfaz es `platform` -> `projectkey` -> `slot`: al elegir un `platform` se filtran los `projectkey` disponibles, y al elegir un `projectkey` se filtran los `slot` disponibles para esa combinacion.
+- `SLOT_CHOICES` (en el propio script) es un diccionario anidado `platform -> projectkey -> lista de slots`, descubierto consultando los labels `platform`, `projectkey` y `slot` en Loki. Solo se incluyen combinaciones `platform`/`projectkey` que tienen al menos un slot con datos.
 
 ## Slots futuros
 
-Los slots que aún no están en OCP hay que añadirlos en el diccionario del inicio del script
+Los slots que aún no están en OCP, o los nuevos `platform`/`projectkey` que se añadan, hay que incorporarlos en el diccionario `SLOT_CHOICES` al inicio del script.
 
-## Cambio de centro
+## Añadir o actualizar un centro (platform)
 
-Para adaptar el código a otro centro, modificar 
+Para descubrir que `platform` tienen logs disponibles para un `projectkey`:
 
-DEFAULT_PLATFORM = "Openshift-IOP Tordera Logistics5"
-DEFAULT_TARGET = "prendacolgadadutti-c1"
+```
+{projectkey="SGARCP"} | label_values(platform)
+```
 
-A los deseados y también todo el diccionario posterior, para saber los slots posibles por platform y projectkey, se puede ejecutar esta consulta en loki:
+Para descubrir los `slot` disponibles de una combinacion `projectkey` + `platform`:
 
-sum by (slot) (count_over_time({projectkey="SGARCP",platform=~"Openshift-IOP Tordera Logistics5",environment="pro"} | json [1h]))
+```
+sum by (slot) (count_over_time({projectkey="SGARCP",platform="Openshift-IOP Tordera Logistics5",environment="pro"} | json [1h]))
+```
+
+Con esos resultados, añadir/actualizar la entrada correspondiente en `SLOT_CHOICES[platform][projectkey]`. Si un `platform` no tiene ningun `projectkey` con slots, no debe incluirse en el diccionario.
 
 
